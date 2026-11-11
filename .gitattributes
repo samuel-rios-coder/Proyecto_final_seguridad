@@ -1,0 +1,6 @@
+# Forzar saltos de línea LF en archivos que se ejecutan en Linux,
+# aunque el repo se clone en Windows. Evita romper el provisioning.
+*.sh        text eol=lf
+*.rules     text eol=lf
+Vagrantfile text eol=lf
+*.yaml      text eol=lf

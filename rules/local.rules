@@ -1,0 +1,22 @@
+# ============================================================
+#  Reglas locales del laboratorio IDS - Proyecto 4
+#  Se copian a /etc/snort/rules/local.rules durante el provisioning.
+#  SID >= 1000000 reservados para reglas locales. Sube 'rev' al editar.
+# ============================================================
+
+# ---------- a) Escaneo TCP SYN (Nmap -sS) ----------
+alert tcp any any -> $HOME_NET any (msg:"LAB SCAN Posible escaneo TCP SYN (Nmap)"; flags:S,12; flow:stateless; detection_filter:track by_src, count 20, seconds 3; classtype:attempted-recon; sid:1000001; rev:1;)
+alert tcp any any -> $HOME_NET any (msg:"LAB SCAN Nmap SYN con window 1024"; flags:S,12; window:1024; flow:stateless; detection_filter:track by_src, count 10, seconds 5; classtype:attempted-recon; sid:1000002; rev:1;)
+
+# ---------- b) Fuerza bruta SSH ----------
+alert tcp any any -> $HOME_NET 22 (msg:"LAB SSH Posible fuerza bruta (conexiones nuevas)"; flags:S,12; flow:stateless; detection_filter:track by_src, count 5, seconds 60; classtype:attempted-admin; sid:1000010; rev:1;)
+alert tcp any any -> $HOME_NET 22 (msg:"LAB SSH Banner de cliente repetido"; flow:to_server,established; content:"SSH-"; depth:4; detection_filter:track by_src, count 5, seconds 60; classtype:attempted-admin; sid:1000011; rev:1;)
+
+# ---------- c) Inyeccion SQL sobre HTTP ----------
+alert tcp any any -> $HOME_NET $HTTP_PORTS (msg:"LAB SQLi UNION SELECT en URI"; flow:to_server,established; content:"union"; nocase; http_uri; content:"select"; nocase; http_uri; distance:0; classtype:web-application-attack; sid:1000020; rev:1;)
+alert tcp any any -> $HOME_NET $HTTP_PORTS (msg:"LAB SQLi Tautologia OR/AND en URI"; flow:to_server,established; pcre:"/(\x27|%27)(\s|\+|%20)*(or|and)(\s|\+|%20)/Ui"; classtype:web-application-attack; sid:1000021; rev:1;)
+alert tcp any any -> $HOME_NET $HTTP_PORTS (msg:"LAB SQLi Comentario SQL en URI"; flow:to_server,established; pcre:"/(\x27|%27).*(--|%23|#)/Ui"; classtype:web-application-attack; sid:1000022; rev:1;)
+alert tcp any any -> $HOME_NET $HTTP_PORTS (msg:"LAB SQLi Herramienta sqlmap (User-Agent)"; flow:to_server,established; content:"sqlmap"; nocase; http_header; classtype:web-application-attack; sid:1000023; rev:1;)
+
+# ---------- d) ICMP (util para una primera prueba de humo) ----------
+alert icmp any any -> $HOME_NET any (msg:"LAB ICMP ping a la red protegida"; itype:8; classtype:misc-activity; sid:1000030; rev:1;)

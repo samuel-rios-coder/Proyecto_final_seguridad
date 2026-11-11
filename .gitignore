@@ -1,0 +1,12 @@
+# Estado de las VMs de Vagrant (pesado, específico de tu equipo)
+.vagrant/
+
+# Logs y salidas temporales
+*.log
+*.pcap
+captura*.pcap
+
+# Archivos de SO
+Thumbs.db
+Desktop.ini
+.DS_Store
